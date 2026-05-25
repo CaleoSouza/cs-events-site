@@ -293,16 +293,12 @@
 </main>
 
 <!-- ══════════════════════ SCRIPTS ══════════════════════ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
 <script>
 
 /* ─────────────────────────────────────────────────────────
-   CONFIGURAÇÃO — repositório onde o sistema.db está salvo
+   CONFIGURAÇÃO — repositório público de dados
 ───────────────────────────────────────────────────────── */
-const REPO    = 'CaleoSouza/Sistema-Events';
-const BRANCH  = 'main';
-const DB_PATH = 'assets/dados/sistema.db';
-const DB_URL  = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${DB_PATH}`;
+const JSON_URL = 'https://raw.githubusercontent.com/CaleoSouza/cs-events-data/main/eventos.json';
 
 /* ─────────────────────────────────────────────────────────
    UTILITÁRIOS
@@ -473,7 +469,7 @@ function renderRecentes() {
 }
 
 /* ─────────────────────────────────────────────────────────
-   CARREGAMENTO DO BANCO VIA sql.js
+   CARREGAMENTO DO JSON via GitHub raw
 ───────────────────────────────────────────────────────── */
 async function carregar() {
   const ico = document.getElementById('ico-reload');
@@ -481,38 +477,20 @@ async function carregar() {
   document.getElementById('rodape').textContent = 'Buscando dados do GitHub...';
 
   try {
-    // 1. Inicializar sql.js (SQLite em WebAssembly)
-    const SQL = await initSqlJs({
-      locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`
-    });
-
-    // 2. Baixar o banco de dados diretamente do repositório
-    const resp = await fetch(`${DB_URL}?_=${Date.now()}`);
+    // 1. Baixar eventos.json do repositório público de dados
+    const resp = await fetch(`${JSON_URL}?_=${Date.now()}`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status} — verifique se o repositório é público`);
 
-    // 3. Carregar o binário no sql.js
-    const db   = new SQL.Database(new Uint8Array(await resp.arrayBuffer()));
+    const payload = await resp.json();
+    _eventos = Array.isArray(payload.eventos) ? payload.eventos : [];
 
-    // 4. Consultar eventos ativos (sem soft delete)
-    const stmt = db.prepare(
-      `SELECT titulo, descricao, data_inicio, categoria, criado_em
-       FROM eventos
-       WHERE deletado_em IS NULL`
-    );
-    const lista = [];
-    while (stmt.step()) lista.push(stmt.getAsObject());
-    stmt.free();
-    db.close();
-
-    _eventos = lista;
-
-    // 5. Renderizar tudo
+    // 2. Renderizar tudo
     renderCal();
     renderProximos();
     renderRecentes();
 
     const agora = new Date();
-    const n = lista.length;
+    const n = _eventos.length;
     document.getElementById('rodape').textContent =
       `Atualizado às ${agora.toLocaleTimeString('pt-BR')} · ${n} evento${n !== 1 ? 's' : ''}`;
 
