@@ -298,7 +298,8 @@
 /* ─────────────────────────────────────────────────────────
    CONFIGURAÇÃO — repositório público de dados
 ───────────────────────────────────────────────────────── */
-const JSON_URL = 'https://raw.githubusercontent.com/CaleoSouza/cs-events-data/main/eventos.json';
+// GitHub API — sem cache CDN (funciona em repositório público sem token)
+const JSON_API_URL = 'https://api.github.com/repos/CaleoSouza/cs-events-data/contents/eventos.json';
 
 /* ─────────────────────────────────────────────────────────
    UTILITÁRIOS
@@ -477,11 +478,14 @@ async function carregar() {
   document.getElementById('rodape').textContent = 'Buscando dados do GitHub...';
 
   try {
-    // 1. Baixar eventos.json do repositório público de dados
-    const resp = await fetch(`${JSON_URL}?_=${Date.now()}`);
+    // 1. Baixar eventos.json via GitHub API (sem cache CDN)
+    const resp = await fetch(JSON_API_URL, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    });
     if (!resp.ok) throw new Error(`HTTP ${resp.status} — verifique se o repositório é público`);
 
-    const payload = await resp.json();
+    const apiData  = await resp.json();
+    const payload  = JSON.parse(atob(apiData.content.replace(/\n/g, '')));
     _eventos = Array.isArray(payload.eventos) ? payload.eventos : [];
 
     // 2. Renderizar tudo
