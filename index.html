@@ -176,6 +176,65 @@
       margin-top: 1px;
     }
 
+    /* ─── Dia clicável ───────────────────────────────────────── */
+    .cal-cell.has-ev { cursor: pointer; border-radius: 8px; transition: background .15s; }
+    .cal-cell.has-ev:hover { background: rgba(59,130,246,.12); }
+    .cal-cell.has-ev .cal-num { font-weight: 600; }
+
+    /* ─── Bottom sheet (detalhes do dia) ─────────────────────── */
+    .dia-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 999;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeInOv .18s ease;
+    }
+    @keyframes fadeInOv { from { opacity:0; } to { opacity:1; } }
+    .dia-sheet {
+      background: #1c2333;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 540px;
+      max-height: 68vh;
+      overflow-y: auto;
+      animation: slideUp .22s ease;
+    }
+    @keyframes slideUp { from { transform:translateY(50px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    .dia-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid #30363d;
+    }
+    .dia-header-title { font-size:.95rem; font-weight:700; color:#f9fafb; }
+    .dia-header-close {
+      background: none; border: none; color:#9ca3af;
+      font-size:1.1rem; cursor:pointer;
+      padding:.2rem .4rem; border-radius:6px; line-height:1;
+    }
+    .dia-header-close:hover { background:#30363d; }
+    .dia-ev-row {
+      display: flex; align-items: center; gap:.75rem;
+      padding:.75rem 1.25rem;
+      border-bottom: 1px solid #252d3d;
+    }
+    .dia-ev-row:last-child { border-bottom: none; }
+    .dia-ev-thumb {
+      width:46px; height:46px; border-radius:10px;
+      background:#252d3d;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.4rem; flex-shrink:0;
+    }
+    .dia-ev-body { flex:1; min-width:0; }
+    .dia-ev-cat   { font-size:.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:.04em; margin-bottom:.05rem; }
+    .dia-ev-title { font-size:.875rem; font-weight:600; color:#f9fafb; }
+    .dia-ev-desc  { font-size:.72rem; color:#9ca3af; margin-top:.1rem; }
+    .dia-ev-local { font-size:.7rem;  color:#6b7280; margin-top:.15rem; }
+
     /* ─── Linha de evento ────────────────────────────────────── */
     .ev-row {
       display: flex;
@@ -265,7 +324,7 @@
   <!-- Próximos Eventos -->
   <div class="card-section">
     <div class="card-head">
-      <p class="card-title">Eventos Próximos</p>
+      <p class="card-title" id="titulo-proximos">Eventos Próximos</p>
       <p class="card-sub" id="sub-proximos">Carregando...</p>
     </div>
     <div id="lista-proximos">
@@ -291,6 +350,17 @@
   <div class="page-footer" id="rodape">Conectando ao GitHub...</div>
 
 </main>
+
+<!-- ══════════════════════ BOTTOM SHEET ══════════════════════ -->
+<div id="overlay-dia" style="display:none" class="dia-overlay" onclick="fecharDia()">
+  <div class="dia-sheet" onclick="event.stopPropagation()">
+    <div class="dia-header">
+      <span class="dia-header-title" id="dia-titulo-txt"></span>
+      <button class="dia-header-close" onclick="fecharDia()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div id="dia-corpo"></div>
+  </div>
+</div>
 
 <!-- ══════════════════════ SCRIPTS ══════════════════════ -->
 <script>
@@ -388,8 +458,10 @@ function renderCal() {
     let cls = 'cal-cell';
     if (ehHoje) cls += ' today';
     if (ehDom)  cls += ' sun';
+    if (temEv)  cls += ' has-ev';
 
-    cells += `<div class="${cls}">
+    const click = temEv ? ` onclick="verDia(${d})"` : '';
+    cells += `<div class="${cls}"${click}>
       <span class="cal-num">${d}</span>
       ${temEv ? '<div class="cal-dot"></div>' : ''}
     </div>`;
@@ -427,6 +499,7 @@ function navMes(delta) {
   if (_calMes > 11) { _calMes = 0; _calAno++; }
   if (_calMes < 0)  { _calMes = 11; _calAno--; }
   renderCal();
+  renderProximos();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -446,17 +519,39 @@ function htmlLinha(ev) {
 
 function renderProximos() {
   const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-  const prox = _eventos
-    .filter(e => { const d = parseData(e.data_inicio); return d && d >= hoje; })
-    .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
+  const mesAtual = hoje.getMonth();
+  const anoAtual = hoje.getFullYear();
+  const ehMesAtual = _calMes === mesAtual && _calAno === anoAtual;
 
-  const n = prox.length;
-  document.getElementById('sub-proximos').textContent =
-    n ? `${n} evento${n !== 1 ? 's' : ''} agendado${n !== 1 ? 's' : ''}` : 'Nenhum evento agendado';
+  let lista;
+  if (ehMesAtual) {
+    // Mês atual: eventos a partir de hoje
+    lista = _eventos
+      .filter(e => { const d = parseData(e.data_inicio); return d && d >= hoje; })
+      .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
+  } else {
+    // Outro mês: todos os eventos daquele mês
+    lista = _eventos
+      .filter(e => {
+        const d = parseData(e.data_inicio);
+        return d && d.getFullYear() === _calAno && d.getMonth() === _calMes;
+      })
+      .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
+  }
+
+  const n = lista.length;
+  const tituloEl = document.getElementById('titulo-proximos');
+  if (tituloEl) {
+    tituloEl.textContent = ehMesAtual ? 'Eventos Próximos' : `Eventos em ${MESES_PT[_calMes]}`;
+  }
+
+  document.getElementById('sub-proximos').textContent = ehMesAtual
+    ? (n ? `${n} evento${n !== 1 ? 's' : ''} agendado${n !== 1 ? 's' : ''}` : 'Nenhum evento agendado')
+    : (n ? `${n} evento${n !== 1 ? 's' : ''} em ${MESES_PT[_calMes]}` : `Nenhum evento em ${MESES_PT[_calMes]}`);
 
   document.getElementById('lista-proximos').innerHTML =
-    n ? prox.slice(0, 20).map(htmlLinha).join('')
-      : '<div class="state-empty">Nenhum evento próximo</div>';
+    n ? lista.slice(0, 20).map(htmlLinha).join('')
+      : `<div class="state-empty">Nenhum evento ${ehMesAtual ? 'próximo' : 'neste mês'}</div>`;
 }
 
 function renderRecentes() {
@@ -467,6 +562,39 @@ function renderRecentes() {
   document.getElementById('lista-recentes').innerHTML =
     rec.length ? rec.map(htmlLinha).join('')
                : '<div class="state-empty">Nenhum evento encontrado</div>';
+}
+
+/* ─────────────────────────────────────────────────────────
+   BOTTOM SHEET — detalhes do dia
+───────────────────────────────────────────────────────── */
+function verDia(dia) {
+  const evsDia = _eventos
+    .filter(e => {
+      const d = parseData(e.data_inicio);
+      return d && d.getFullYear() === _calAno && d.getMonth() === _calMes && d.getDate() === dia;
+    })
+    .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
+
+  const diaStr = String(dia).padStart(2, '0');
+  document.getElementById('dia-titulo-txt').textContent =
+    `${diaStr} de ${MESES_PT[_calMes]} ${_calAno}`;
+
+  document.getElementById('dia-corpo').innerHTML = evsDia.map(e => `
+    <div class="dia-ev-row">
+      <div class="dia-ev-thumb">${getEmoji(e.titulo, e.categoria)}</div>
+      <div class="dia-ev-body">
+        ${e.categoria ? `<div class="dia-ev-cat">${e.categoria}</div>` : ''}
+        <div class="dia-ev-title">${e.titulo || '(sem título)'}</div>
+        ${e.descricao ? `<div class="dia-ev-desc">${e.descricao}</div>` : ''}
+        ${e.local     ? `<div class="dia-ev-local"><i class="bi bi-geo-alt"></i> ${e.local}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('overlay-dia').style.display = 'flex';
+}
+
+function fecharDia() {
+  document.getElementById('overlay-dia').style.display = 'none';
 }
 
 /* ─────────────────────────────────────────────────────────
