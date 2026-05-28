@@ -380,17 +380,18 @@ const MESES_PT = [
 ];
 
 const EMOJI_CAT = {
-  '15 anos':     '🎂',
-  'aniversário': '🎉',
-  'business':    '💼',
-  'casamento':   '💍',
-  'chá de bebê': '👶',
-  'família':     '👨‍👩‍👧',
-  'feminina':    '💄',
-  'formatura':   '🎓',
-  'gestante':    '🤰',
-  'infantil':    '🎈',
-  'pré wedding': '💒',
+  '15 anos':       '🎂',
+  'sessão 15 anos': '🎂',
+  'aniversário':    '🎉',
+  'business':      '💼',
+  'casamento':     '💍',
+  'chá de bebê':   '👶',
+  'família':        '👨‍👩‍👧',
+  'feminina':      '💄',
+  'formatura':     '🎓',
+  'gestante':      '🤰',
+  'infantil':      '🎈',
+  'pré wedding':   '💒',
 };
 
 function getEmoji(titulo, categoria) {
@@ -613,7 +614,10 @@ async function carregar() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status} — verifique se o repositório é público`);
 
     const apiData  = await resp.json();
-    const payload  = JSON.parse(atob(apiData.content.replace(/\n/g, '')));
+    const content = apiData.content.replace(/\n/g, '');
+    const bytes = Uint8Array.from(atob(content), c => c.charCodeAt(0));
+    const jsonStr = new TextDecoder('utf-8').decode(bytes);
+    const payload  = JSON.parse(jsonStr);
     _eventos = Array.isArray(payload.eventos) ? payload.eventos : [];
 
     // 2. Renderizar tudo
