@@ -303,7 +303,7 @@ async function carregarPdfsOrcamento() {
       <div style="display:flex; align-items:center; gap:12px; padding:12px; border-bottom:1px solid #f3f4f6;">
         <i class="bi bi-file-pdf" style="font-size:24px; color:#e53935;"></i>
         <div style="flex:1; min-width:0;">
-          <div style="font-weight:500; color:#1a1a1a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          <div style="font-weight:500; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
             ${pdf.nome}
           </div>
           <div style="font-size:0.75rem; color:#9ca3af;">
