@@ -302,10 +302,16 @@
     <span class="logo-badge">CS</span>
     <span class="logo-name">Events</span>
   </a>
-  <button class="btn-reload" onclick="carregar()">
-    <i class="bi bi-arrow-clockwise" id="ico-reload"></i>
-    Atualizar
-  </button>
+  <div style="display:flex; gap:8px;">
+    <button class="btn-reload" onclick="abrirModalOrcamentos()">
+      <i class="bi bi-file-pdf"></i>
+      Orçamentos
+    </button>
+    <button class="btn-reload" onclick="carregar()">
+      <i class="bi bi-arrow-clockwise" id="ico-reload"></i>
+      Atualizar
+    </button>
+  </div>
 </header>
 
 <!-- ══════════════════════ CONTEÚDO ══════════════════════ -->
@@ -359,6 +365,30 @@
       <button class="dia-header-close" onclick="fecharDia()"><i class="bi bi-x-lg"></i></button>
     </div>
     <div id="dia-corpo"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MODAL ORÇAMENTOS ══════════════════════ -->
+<div id="overlay-orcamentos" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:999; display:flex; align-items:flex-end; justify-content:center;">
+  <div style="background:#1c2333; border-radius:20px 20px 0 0; width:100%; max-width:540px; max-height:68vh; overflow-y:auto; animation:slideUp .22s ease;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem 0.75rem; border-bottom:1px solid #30363d;">
+      <span style="font-size:.95rem; font-weight:700; color:#f9fafb;">Orçamentos</span>
+      <button onclick="fecharModalOrcamentos()" style="background:none; border:none; color:#9ca3af; font-size:1.1rem; cursor:pointer; padding:.2rem .4rem; border-radius:6px; line-height:1;">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    
+    <div style="padding:1.25rem;">
+      <label style="display:block; font-size:0.9rem; color:#f9fafb; margin-bottom:8px; font-weight:600;">Selecione o ano:</label>
+      <select id="select-ano-orcamento" style="width:100%; padding:10px; border:1px solid #30363d; background:#252d3d; color:#f9fafb; border-radius:8px; font-size:0.9rem; margin-bottom:12px;">
+        <option value="">Carregando anos...</option>
+      </select>
+      <button id="btn-carregar-orcamentos" onclick="carregarPdfsOrcamento()" style="width:100%; padding:10px; background:#3b82f6; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.9rem;">
+        Carregar PDFs
+      </button>
+    </div>
+
+    <div id="corpo-pdfs-orcamento"></div>
   </div>
 </div>
 
@@ -641,5 +671,9 @@ async function carregar() {
 document.addEventListener('DOMContentLoaded', carregar);
 
 </script>
+
+<!-- Integração Dropbox Orçamentos -->
+<script src="orcamentos.js"></script>
+
 </body>
 </html>
