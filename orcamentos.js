@@ -3,7 +3,7 @@
  */
 
 // URL pública para carregar config do Dropbox (via GitHub raw)
-const DROPBOX_CONFIG_URL = 'https://raw.githubusercontent.com/CaleoSouza/Sistema-Events/main/assets/dados/dropbox_config.json';
+const DROPBOX_CONFIG_URL = 'https://raw.githubusercontent.com/CaleoSouza/cs-events-site/main/assets/dados/dropbox_config.json';
 
 let _dropboxConfig = null;
 let _dropboxPastasAno = [];
