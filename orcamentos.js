@@ -324,12 +324,14 @@ async function carregarPdfsOrcamento() {
 }
 
 /**
- * Abre o PDF em nova aba
+ * Abre o PDF em nova aba (visualização no navegador)
  */
 async function abrirPdfOrcamento(caminhoArquivo) {
-  const url = await obterUrlDownload(caminhoArquivo);
+  const url = await obterUrlCompartilhamento(caminhoArquivo);
   if (url) {
-    window.open(url, '_blank');
+    // Adiciona ?raw=1 para forçar visualização no navegador em vez de download
+    const urlVisualizacao = url.split('?')[0] + '?raw=1';
+    window.open(urlVisualizacao, '_blank');
   } else {
     alert('Erro ao obter URL do arquivo');
   }
