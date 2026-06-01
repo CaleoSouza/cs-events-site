@@ -324,14 +324,13 @@ async function carregarPdfsOrcamento() {
 }
 
 /**
- * Abre o PDF em nova aba (visualização no navegador)
+ * Abre o PDF em nova aba (via Dropbox)
  */
 async function abrirPdfOrcamento(caminhoArquivo) {
   const url = await obterUrlCompartilhamento(caminhoArquivo);
   if (url) {
-    // Força visualização no navegador: substitui dl=1 por dl=0 ou adiciona ?dl=0
-    let urlVisualizacao = url.includes('dl=') ? url.replace('dl=1', 'dl=0') : url + (url.includes('?') ? '&dl=0' : '?dl=0');
-    window.open(urlVisualizacao, '_blank');
+    // Abre direto no site do Dropbox - funciona melhor em mobile e desktop
+    window.open(url, '_blank');
   } else {
     alert('Erro ao obter URL do arquivo');
   }
