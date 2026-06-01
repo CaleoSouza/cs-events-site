@@ -321,19 +321,6 @@
     </div>
   </div>
 
-  <!-- Próximos Eventos -->
-  <div class="card-section">
-    <div class="card-head">
-      <p class="card-title" id="titulo-proximos">Eventos Próximos</p>
-      <p class="card-sub" id="sub-proximos">Carregando...</p>
-    </div>
-    <div id="lista-proximos">
-      <div class="state-loading">
-        <div class="spinner-border spinner-border-sm text-primary"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- Adicionados Recentemente -->
   <div class="card-section">
     <div class="card-head">
@@ -394,6 +381,7 @@ const EMOJI_CAT = {
   'formatura':     '🎓',
   'gestante':      '🤰',
   'infantil':      '🎈',
+  'mini':          '📸',
   'pré wedding':   '💒',
 };
 
@@ -503,7 +491,6 @@ function navMes(delta) {
   if (_calMes > 11) { _calMes = 0; _calAno++; }
   if (_calMes < 0)  { _calMes = 11; _calAno--; }
   renderCal();
-  renderProximos();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -521,47 +508,10 @@ function htmlLinha(ev) {
     </div>`;
 }
 
-function renderProximos() {
-  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-  const mesAtual = hoje.getMonth();
-  const anoAtual = hoje.getFullYear();
-  const ehMesAtual = _calMes === mesAtual && _calAno === anoAtual;
-
-  let lista;
-  if (ehMesAtual) {
-    // Mês atual: eventos a partir de hoje
-    lista = _eventos
-      .filter(e => { const d = parseData(e.data_inicio); return d && d >= hoje; })
-      .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
-  } else {
-    // Outro mês: todos os eventos daquele mês
-    lista = _eventos
-      .filter(e => {
-        const d = parseData(e.data_inicio);
-        return d && d.getFullYear() === _calAno && d.getMonth() === _calMes;
-      })
-      .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
-  }
-
-  const n = lista.length;
-  const tituloEl = document.getElementById('titulo-proximos');
-  if (tituloEl) {
-    tituloEl.textContent = ehMesAtual ? 'Eventos Próximos' : `Eventos em ${MESES_PT[_calMes]}`;
-  }
-
-  document.getElementById('sub-proximos').textContent = ehMesAtual
-    ? (n ? `${n} evento${n !== 1 ? 's' : ''} agendado${n !== 1 ? 's' : ''}` : 'Nenhum evento agendado')
-    : (n ? `${n} evento${n !== 1 ? 's' : ''} em ${MESES_PT[_calMes]}` : `Nenhum evento em ${MESES_PT[_calMes]}`);
-
-  document.getElementById('lista-proximos').innerHTML =
-    n ? lista.slice(0, 20).map(htmlLinha).join('')
-      : `<div class="state-empty">Nenhum evento ${ehMesAtual ? 'próximo' : 'neste mês'}</div>`;
-}
-
 function renderRecentes() {
   const rec = [..._eventos]
     .sort((a, b) => (b.criado_em || '').localeCompare(a.criado_em || ''))
-    .slice(0, 8);
+    .slice(0, 5);
 
   document.getElementById('lista-recentes').innerHTML =
     rec.length ? rec.map(htmlLinha).join('')
@@ -625,7 +575,6 @@ async function carregar() {
 
     // 2. Renderizar tudo
     renderCal();
-    renderProximos();
     renderRecentes();
 
     const agora = new Date();
