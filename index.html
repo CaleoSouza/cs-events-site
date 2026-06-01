@@ -321,6 +321,19 @@
     </div>
   </div>
 
+  <!-- Eventos do Mês -->
+  <div class="card-section">
+    <div class="card-head">
+      <p class="card-title" id="titulo-mes-eventos">Eventos de Junho</p>
+      <p class="card-sub" id="sub-mes-eventos">Carregando...</p>
+    </div>
+    <div id="lista-mes-eventos">
+      <div class="state-loading">
+        <div class="spinner-border spinner-border-sm text-primary"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Adicionados Recentemente -->
   <div class="card-section">
     <div class="card-head">
@@ -491,6 +504,7 @@ function navMes(delta) {
   if (_calMes > 11) { _calMes = 0; _calAno++; }
   if (_calMes < 0)  { _calMes = 11; _calAno--; }
   renderCal();
+  renderEventosMes();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -506,6 +520,25 @@ function htmlLinha(ev) {
         ${ev.descricao ? `<div class="ev-desc">${ev.descricao}</div>` : ''}
       </div>
     </div>`;
+}
+
+function renderEventosMes() {
+  const eventosMes = _eventos
+    .filter(e => {
+      const d = parseData(e.data_inicio);
+      return d && d.getFullYear() === _calAno && d.getMonth() === _calMes;
+    })
+    .sort((a, b) => parseData(a.data_inicio) - parseData(b.data_inicio));
+
+  const n = eventosMes.length;
+  document.getElementById('titulo-mes-eventos').textContent = `Eventos de ${MESES_PT[_calMes]}`;
+  document.getElementById('sub-mes-eventos').textContent = n
+    ? `${n} evento${n !== 1 ? 's' : ''} em ${MESES_PT[_calMes]}`
+    : `Nenhum evento em ${MESES_PT[_calMes]}`;
+
+  document.getElementById('lista-mes-eventos').innerHTML =
+    n ? eventosMes.map(htmlLinha).join('')
+      : `<div class="state-empty">Nenhum evento em ${MESES_PT[_calMes]}</div>`;
 }
 
 function renderRecentes() {
@@ -575,6 +608,7 @@ async function carregar() {
 
     // 2. Renderizar tudo
     renderCal();
+    renderEventosMes();
     renderRecentes();
 
     const agora = new Date();
