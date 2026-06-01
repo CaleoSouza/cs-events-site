@@ -329,8 +329,8 @@ async function carregarPdfsOrcamento() {
 async function abrirPdfOrcamento(caminhoArquivo) {
   const url = await obterUrlCompartilhamento(caminhoArquivo);
   if (url) {
-    // Adiciona ?raw=1 para forçar visualização no navegador em vez de download
-    const urlVisualizacao = url.split('?')[0] + '?raw=1';
+    // Força visualização no navegador: substitui dl=1 por dl=0 ou adiciona ?dl=0
+    let urlVisualizacao = url.includes('dl=') ? url.replace('dl=1', 'dl=0') : url + (url.includes('?') ? '&dl=0' : '?dl=0');
     window.open(urlVisualizacao, '_blank');
   } else {
     alert('Erro ao obter URL do arquivo');
