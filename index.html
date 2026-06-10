@@ -148,6 +148,7 @@
       padding-bottom: 0.4rem;
     }
     .cal-dow-sun { color: var(--red); }
+    .cal-dow-sab { color: var(--text-dark); font-weight: 700; }
     .cal-cell {
       display: flex;
       flex-direction: column;
@@ -166,6 +167,7 @@
     }
     .cal-cell.other .cal-num  { color: #d1d5db; }
     .cal-cell.sun   .cal-num  { color: var(--red); }
+    .cal-cell.sab   .cal-num  { color: var(--text-dark); font-weight: 700; }
     .cal-cell.today .cal-num  { background: var(--accent); color: #fff; font-weight: 700; }
     .cal-cell.today.sun .cal-num { color: #fff; }
     .cal-dot {
@@ -175,6 +177,16 @@
       background: var(--accent);
       margin-top: 1px;
     }
+    .cal-dot-feriado {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-top: 1px;
+    }
+
+    .cal-cell.has-feriado { cursor: pointer; }
+    .cal-cell.has-feriado:hover .cal-num { text-decoration: underline; }
 
     /* ─── Dia clicável ───────────────────────────────────────── */
     .cal-cell.has-ev { cursor: pointer; border-radius: 8px; transition: background .15s; }
@@ -456,6 +468,42 @@ let _calMes  = new Date().getMonth();
 let _calAno  = new Date().getFullYear();
 
 /* ─────────────────────────────────────────────────────────
+   FERIADOS NACIONAIS BRASILEIROS
+───────────────────────────────────────────────────────── */
+function calcularPascoa(ano) {
+  const a = ano % 19, b = Math.floor(ano / 100), c = ano % 100;
+  const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mes = Math.floor((h + l - 7 * m + 114) / 31) - 1; // 0-based
+  const dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(ano, mes, dia);
+}
+
+function feriadosBrasileiros(ano) {
+  const p = calcularPascoa(ano);
+  const add = (d, dias) => { const r = new Date(d); r.setDate(r.getDate() + dias); return r; };
+  const chave = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const f = {};
+  f[chave(new Date(ano, 0, 1))]  = 'Confraternização Universal';
+  f[chave(add(p, -48))]          = 'Segunda de Carnaval';
+  f[chave(add(p, -47))]          = 'Terça de Carnaval';
+  f[chave(add(p, -2))]           = 'Sexta-Feira Santa';
+  f[chave(p)]                    = 'Páscoa';
+  f[chave(new Date(ano, 3, 21))] = 'Tiradentes';
+  f[chave(new Date(ano, 4, 1))]  = 'Dia do Trabalho';
+  f[chave(add(p, 60))]           = 'Corpus Christi';
+  f[chave(new Date(ano, 8, 7))]  = 'Independência do Brasil';
+  f[chave(new Date(ano, 9, 12))] = 'Nossa Senhora Aparecida';
+  f[chave(new Date(ano, 10, 2))] = 'Finados';
+  f[chave(new Date(ano, 10, 15))]= 'Proclamação da República';
+  f[chave(new Date(ano, 10, 20))]= 'Consciência Negra';
+  f[chave(new Date(ano, 11, 25))]= 'Natal';
+  return f;
+}
+
+/* ─────────────────────────────────────────────────────────
    CALENDÁRIO
 ───────────────────────────────────────────────────────── */
 function renderCal() {
@@ -468,13 +516,16 @@ function renderCal() {
     }
   }
 
-  const hoje     = new Date();
+  // Feriados do mês exibido
+  const feriados = feriadosBrasileiros(_calAno);
+
+  const hoje      = new Date();
   const totalDias = new Date(_calAno, _calMes + 1, 0).getDate();
   const dow1      = new Date(_calAno, _calMes, 1).getDay(); // 0=Dom
   const diasPrev  = new Date(_calAno, _calMes, 0).getDate();
 
-  // Semana começa na Segunda: offset = (dow1 + 6) % 7
-  const offset = (dow1 + 6) % 7;
+  // Semana começa no Domingo: offset = dow1
+  const offset = dow1;
 
   let cells = '';
 
@@ -488,17 +539,26 @@ function renderCal() {
     const dow    = new Date(_calAno, _calMes, d).getDay();
     const ehHoje = d === hoje.getDate() && _calMes === hoje.getMonth() && _calAno === hoje.getFullYear();
     const ehDom  = dow === 0;
+    const ehSab  = dow === 6;
     const temEv  = diasComEv.has(d);
+    const chave  = `${_calAno}-${String(_calMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const nomeFeriado = feriados[chave];
+    const temFeriado  = !!nomeFeriado;
 
     let cls = 'cal-cell';
-    if (ehHoje) cls += ' today';
-    if (ehDom)  cls += ' sun';
-    if (temEv)  cls += ' has-ev';
+    if (ehHoje)     cls += ' today';
+    if (ehDom)      cls += ' sun';
+    if (ehSab)      cls += ' sab';
+    if (temEv)      cls += ' has-ev';
+    if (temFeriado && !temEv) cls += ' has-feriado';
 
-    const click = temEv ? ` onclick="verDia(${d})"` : '';
-    cells += `<div class="${cls}"${click}>
+    const clickEv      = temEv      ? `onclick="verDia(${d})"` : '';
+    const clickFeriado = temFeriado && !temEv ? `onclick="verFeriado('${nomeFeriado}', '${String(d).padStart(2,'0')}/${String(_calMes+1).padStart(2,'0')}/${_calAno}')"` : '';
+
+    cells += `<div class="${cls}" ${clickEv || clickFeriado}>
       <span class="cal-num">${d}</span>
       ${temEv ? '<div class="cal-dot"></div>' : ''}
+      ${temFeriado && !temEv ? '<div class="cal-dot-feriado"></div>' : ''}
     </div>`;
   }
 
@@ -517,16 +577,23 @@ function renderCal() {
         <button class="cal-nav-btn" onclick="navMes(1)"><i class="bi bi-chevron-right"></i></button>
       </div>
       <div class="cal-grid">
+        <div class="cal-dow cal-dow-sun">D</div>
         <div class="cal-dow">S</div>
         <div class="cal-dow">T</div>
         <div class="cal-dow">Q</div>
         <div class="cal-dow">Q</div>
         <div class="cal-dow">S</div>
-        <div class="cal-dow">S</div>
-        <div class="cal-dow cal-dow-sun">D</div>
+        <div class="cal-dow cal-dow-sab">S</div>
         ${cells}
       </div>
     </div>`;
+}
+
+/* ─────────────────────────────────────────────────────────
+   EXIBIR DETALHE DE FERIADO
+───────────────────────────────────────────────────────── */
+function verFeriado(nome, data) {
+  alert(`🗓️  ${data}\n\n${nome}`);
 }
 
 function navMes(delta) {
