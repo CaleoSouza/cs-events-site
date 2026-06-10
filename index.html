@@ -254,7 +254,10 @@
       gap: 0.75rem;
       padding: 0.75rem 1.25rem;
       border-bottom: 1px solid #f3f4f6;
+      cursor: pointer;
+      transition: background .15s;
     }
+    .ev-row:hover { background: rgba(59,130,246,.07); }
     .ev-row:last-child { border-bottom: none; }
     .ev-thumb {
       width: 46px;
@@ -377,6 +380,45 @@
       <button class="dia-header-close" onclick="fecharDia()"><i class="bi bi-x-lg"></i></button>
     </div>
     <div id="dia-corpo"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MODAL DETALHE EVENTO ══════════════════════ -->
+<div id="overlay-ev-det" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:998; align-items:flex-end; justify-content:center;" onclick="fecharEvDet()">
+  <div style="background:#1c2333; border-radius:20px 20px 0 0; width:100%; max-width:540px; padding:1.25rem 1.5rem 2rem; animation:slideUp .22s ease;" onclick="event.stopPropagation()">
+
+    <!-- Cabeçalho -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;">
+      <span style="font-size:.85rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.05em;">Detalhes do Evento</span>
+      <button onclick="fecharEvDet()" style="background:none; border:none; color:#9ca3af; font-size:1.1rem; cursor:pointer; padding:.2rem .4rem; border-radius:6px; line-height:1;"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <!-- Emoji + título + categoria -->
+    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.25rem;">
+      <div id="ev-det-emoji" style="font-size:2.2rem; width:56px; height:56px; background:#252d3d; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"></div>
+      <div>
+        <div id="ev-det-titulo" style="font-size:1.1rem; font-weight:700; color:#f9fafb; line-height:1.3;"></div>
+        <div id="ev-det-cat" style="font-size:.72rem; color:var(--accent); text-transform:uppercase; letter-spacing:.04em; margin-top:.2rem;"></div>
+      </div>
+    </div>
+
+    <!-- Data/hora -->
+    <div style="display:flex; align-items:center; gap:.6rem; margin-bottom:.75rem;">
+      <i class="bi bi-calendar3" style="color:#6b7280; font-size:.95rem;"></i>
+      <span id="ev-det-data" style="font-size:.9rem; color:#d1d5db;"></span>
+    </div>
+
+    <!-- Local -->
+    <div id="ev-det-local-row" style="display:flex; align-items:center; gap:.6rem; margin-bottom:.75rem;">
+      <i class="bi bi-geo-alt" style="color:#6b7280; font-size:.95rem;"></i>
+      <span id="ev-det-local" style="font-size:.9rem; color:#d1d5db;"></span>
+    </div>
+
+    <!-- Descrição -->
+    <div id="ev-det-desc-row" style="margin-top:.5rem;">
+      <div style="font-size:.75rem; color:#6b7280; margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.04em;">Descrição</div>
+      <div id="ev-det-desc" style="font-size:.88rem; color:#9ca3af; line-height:1.55;"></div>
+    </div>
   </div>
 </div>
 
@@ -607,15 +649,16 @@ function navMes(delta) {
 /* ─────────────────────────────────────────────────────────
    LISTAS DE EVENTOS
 ───────────────────────────────────────────────────────── */
-function htmlLinha(ev) {
+function htmlLinha(ev, idx) {
   return `
-    <div class="ev-row">
+    <div class="ev-row" onclick="verEvento(${idx})">
       <div class="ev-thumb">${getEmoji(ev.titulo, ev.categoria)}</div>
       <div class="ev-body">
         <div class="ev-date">${fmtDia(ev.data_inicio)}</div>
         <div class="ev-title">${ev.titulo || '(sem título)'}</div>
         ${ev.descricao ? `<div class="ev-desc">${ev.descricao}</div>` : ''}
       </div>
+      <i class="bi bi-chevron-right" style="color:#9ca3af; font-size:.8rem; flex-shrink:0;"></i>
     </div>`;
 }
 
@@ -634,7 +677,7 @@ function renderEventosMes() {
     : `Nenhum evento em ${MESES_PT[_calMes]}`;
 
   document.getElementById('lista-mes-eventos').innerHTML =
-    n ? eventosMes.map(htmlLinha).join('')
+    n ? eventosMes.map((ev, i) => htmlLinha(ev, _eventos.indexOf(ev))).join('')
       : `<div class="state-empty">Nenhum evento em ${MESES_PT[_calMes]}</div>`;
 }
 
@@ -644,8 +687,37 @@ function renderRecentes() {
     .slice(0, 5);
 
   document.getElementById('lista-recentes').innerHTML =
-    rec.length ? rec.map(htmlLinha).join('')
+    rec.length ? rec.map(ev => htmlLinha(ev, _eventos.indexOf(ev))).join('')
                : '<div class="state-empty">Nenhum evento encontrado</div>';
+}
+
+/* ─────────────────────────────────────────────────────────
+   MODAL — detalhe de evento individual
+───────────────────────────────────────────────────────── */
+function verEvento(idx) {
+  const ev = _eventos[idx];
+  if (!ev) return;
+
+  const d    = parseData(ev.data_inicio);
+  const data = d ? `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}` : '';
+  const hora = ev.data_inicio && ev.data_inicio.length > 10
+    ? ev.data_inicio.substring(11, 16) : '';
+  const dataHora = hora ? `${data} às ${hora}` : data;
+
+  document.getElementById('ev-det-emoji').textContent  = getEmoji(ev.titulo, ev.categoria);
+  document.getElementById('ev-det-titulo').textContent = ev.titulo || '(sem título)';
+  document.getElementById('ev-det-cat').textContent    = ev.categoria || '';
+  document.getElementById('ev-det-data').textContent   = dataHora;
+  document.getElementById('ev-det-local').textContent  = ev.local || '';
+  document.getElementById('ev-det-local-row').style.display = ev.local ? 'flex' : 'none';
+  document.getElementById('ev-det-desc').textContent   = ev.descricao || '';
+  document.getElementById('ev-det-desc-row').style.display = ev.descricao ? 'block' : 'none';
+
+  document.getElementById('overlay-ev-det').style.display = 'flex';
+}
+
+function fecharEvDet() {
+  document.getElementById('overlay-ev-det').style.display = 'none';
 }
 
 /* ─────────────────────────────────────────────────────────
