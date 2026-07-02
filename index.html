@@ -170,19 +170,34 @@
     .cal-cell.sab   .cal-num  { color: var(--text-dark); font-weight: 700; }
     .cal-cell.today .cal-num  { background: var(--accent); color: #fff; font-weight: 700; }
     .cal-cell.today.sun .cal-num { color: #fff; }
+    
+    /* Pontos em cores por categoria */
+    .cal-dots-container {
+      display: flex;
+      gap: 3px;
+      margin-top: 2px;
+      justify-content: center;
+      height: 5px;
+    }
     .cal-dot {
       width: 5px;
       height: 5px;
       border-radius: 50%;
-      background: var(--accent);
-      margin-top: 1px;
+    }
+    .cal-dot-particular {
+      background: #22c55e;  /* Verde */
+    }
+    .cal-dot-atendimento {
+      background: #ff9800;  /* Laranja */
+    }
+    .cal-dot-reuniao {
+      background: #9c27b0;  /* Roxo */
+    }
+    .cal-dot-evento {
+      background: #3b82f6;  /* Azul */
     }
     .cal-dot-feriado {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #22c55e;
-      margin-top: 1px;
+      background: #ef4444;  /* Vermelho */
     }
 
     .cal-cell.has-feriado { cursor: pointer; }
@@ -549,12 +564,14 @@ function feriadosBrasileiros(ano) {
    CALENDÁRIO
 ───────────────────────────────────────────────────────── */
 function renderCal() {
-  // Dias que têm evento no mês/ano exibido
-  const diasComEv = new Set();
+  // Mapear eventos por dia
+  const eventosPorDia = {};
   for (const ev of _eventos) {
     const d = parseData(ev.data_inicio);
     if (d && d.getFullYear() === _calAno && d.getMonth() === _calMes) {
-      diasComEv.add(d.getDate());
+      const dia = d.getDate();
+      if (!eventosPorDia[dia]) eventosPorDia[dia] = [];
+      eventosPorDia[dia].push(ev);
     }
   }
 
@@ -582,7 +599,7 @@ function renderCal() {
     const ehHoje = d === hoje.getDate() && _calMes === hoje.getMonth() && _calAno === hoje.getFullYear();
     const ehDom  = dow === 0;
     const ehSab  = dow === 6;
-    const temEv  = diasComEv.has(d);
+    const temEv  = eventosPorDia[d] && eventosPorDia[d].length > 0;
     const chave  = `${_calAno}-${String(_calMes+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const nomeFeriado = feriados[chave];
     const temFeriado  = !!nomeFeriado;
@@ -597,10 +614,28 @@ function renderCal() {
     const clickEv      = temEv      ? `onclick="verDia(${d})"` : '';
     const clickFeriado = temFeriado && !temEv ? `onclick="verFeriado('${nomeFeriado}', '${String(d).padStart(2,'0')}/${String(_calMes+1).padStart(2,'0')}/${_calAno}')"` : '';
 
+    // Construir container de pontos por categoria
+    let dotsHtml = '';
+    if (temEv) {
+      const evsDia = eventosPorDia[d];
+      const temParticular = evsDia.some(e => e.categoria?.toLowerCase() === 'particular');
+      const temAtendimento = evsDia.some(e => e.categoria?.toLowerCase() === 'atendimento');
+      const temReuniao = evsDia.some(e => e.categoria?.toLowerCase() === 'reunião');
+      const temOutro = evsDia.some(e => !['particular', 'atendimento', 'reunião'].includes(e.categoria?.toLowerCase() || ''));
+      
+      dotsHtml = '<div class="cal-dots-container">';
+      if (temParticular)  dotsHtml += '<div class="cal-dot cal-dot-particular"></div>';
+      if (temAtendimento) dotsHtml += '<div class="cal-dot cal-dot-atendimento"></div>';
+      if (temReuniao)     dotsHtml += '<div class="cal-dot cal-dot-reuniao"></div>';
+      if (temOutro)       dotsHtml += '<div class="cal-dot cal-dot-evento"></div>';
+      dotsHtml += '</div>';
+    } else if (temFeriado) {
+      dotsHtml = '<div class="cal-dots-container"><div class="cal-dot cal-dot-feriado"></div></div>';
+    }
+
     cells += `<div class="${cls}" ${clickEv || clickFeriado}>
       <span class="cal-num">${d}</span>
-      ${temEv ? '<div class="cal-dot"></div>' : ''}
-      ${temFeriado && !temEv ? '<div class="cal-dot-feriado"></div>' : ''}
+      ${dotsHtml}
     </div>`;
   }
 
