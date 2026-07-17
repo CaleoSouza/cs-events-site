@@ -6,12 +6,30 @@
 // Catalogo de PDFs -- adicione novos arquivos aqui
 const CATALOGO = {
   "2026": [
-    "15 anos 2026.pdf",
-    "Aniversário Adulto 2026.pdf",
-    "Batizado 2026.pdf",
+    "Orçamento 15 Anos 2026.pdf",
+    "Orçamento Aniversário Adulto 2026.pdf",
+    "Orçamento Batizado 2026.pdf",
+    "Orçamento Bodas ou Aniversário 2026.pdf",
+    "Orçamento Business Session 2026.pdf",
+    "Orçamento Casamento 2026.pdf",
+    "Orçamento Chá de Bebê - Fralda - Revelação 2026.pdf",
+    "Orçamento Elopement Wedding 2026.pdf",
+    "Orçamento Festas Infantis 2026.pdf",
+    "Orçamento Noivado 2026.pdf",
+    "Orçamento Recepção de Formatura 2026.pdf",
+    "Orçamento Sessão 15 Anos 2026.pdf",
+    "Orçamento Sessão Família 2026.pdf",
+    "Orçamento Sessão Feminina 2026.pdf",
+    "Orçamento Sessão Gestante 2026.pdf",
   ],
-  "2027": [],
-  "2028": [],
+  "2027": [
+    "Orçamento 15 Anos 2027.pdf",
+    "Orçamento Casamento 2027.pdf",
+    "Orçamento Recepção de Formatura 2027.pdf",
+  ],
+  "2028": [
+    "Orçamento Casamento 2028.pdf",
+  ],
 };
 
 const ORC_BASE = "assets/orcamentos";
