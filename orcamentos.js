@@ -7,7 +7,7 @@
 const CATALOGO = {
   "2026": [
     "15 anos 2026.pdf",
-    "Aniversario Adulto 2026.pdf",
+    "Aniversário Adulto 2026.pdf",
     "Batizado 2026.pdf",
   ],
   "2027": [],
