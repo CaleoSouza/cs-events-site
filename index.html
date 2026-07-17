@@ -337,6 +337,10 @@
       <i class="bi bi-file-pdf"></i>
       Orçamentos
     </button>
+    <button class="btn-reload" onclick="abrirModalLoja()">
+      <i class="bi bi-shop"></i>
+      Loja
+    </button>
     <button class="btn-reload" onclick="carregar()">
       <i class="bi bi-arrow-clockwise" id="ico-reload"></i>
       Atualizar
@@ -433,6 +437,32 @@
     <div id="ev-det-desc-row" style="margin-top:.5rem;">
       <div style="font-size:.75rem; color:#6b7280; margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.04em;">Descrição</div>
       <div id="ev-det-desc" style="font-size:.88rem; color:#9ca3af; line-height:1.55;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ MODAL LOJA ══════════════════════ -->
+<div id="overlay-loja" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:999; align-items:flex-end; justify-content:center;" onclick="fecharModalLoja()">
+  <div style="background:#1c2333; border-radius:20px 20px 0 0; width:100%; max-width:540px; max-height:85vh; display:flex; flex-direction:column; animation:slideUp .22s ease;" onclick="event.stopPropagation()">
+
+    <!-- Cabeçalho -->
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem .75rem; border-bottom:1px solid #30363d; flex-shrink:0;">
+      <span style="font-size:.95rem; font-weight:700; color:#f9fafb;">Loja</span>
+      <button onclick="fecharModalLoja()" style="background:none; border:none; color:#9ca3af; font-size:1.1rem; cursor:pointer; padding:.2rem .4rem; border-radius:6px; line-height:1;"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <!-- Grade de imagens -->
+    <div id="corpo-loja" style="padding:1rem; overflow-y:auto; flex:1;"></div>
+
+    <!-- Visualizador full -->
+    <div id="loja-visualizador" style="display:none; position:absolute; inset:0; background:#0d1117; border-radius:20px 20px 0 0; flex-direction:column; z-index:10;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem .75rem; border-bottom:1px solid #30363d; flex-shrink:0;">
+        <span id="loja-img-titulo" style="font-size:.95rem; font-weight:700; color:#f9fafb;"></span>
+        <button onclick="_fecharVisualizador()" style="background:none; border:none; color:#9ca3af; font-size:1.1rem; cursor:pointer; padding:.2rem .4rem; border-radius:6px; line-height:1;"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div style="flex:1; overflow-y:auto; display:flex; align-items:center; justify-content:center; padding:1rem;">
+        <img id="loja-img-full" src="" alt="" style="max-width:100%; max-height:100%; border-radius:8px; object-fit:contain;">
+      </div>
     </div>
   </div>
 </div>
@@ -839,6 +869,7 @@ document.addEventListener('DOMContentLoaded', carregar);
 </script>
 
 <script src="orcamentos.js?v=5"></script>
+<script src="loja.js"></script>
 
 </body>
 </html>
