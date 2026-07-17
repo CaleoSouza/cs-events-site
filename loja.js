@@ -26,7 +26,7 @@ function _renderLoja() {
   let html = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">';
   for (const img of LOJA_IMGS) {
     const src = LOJA_BASE + '/' + encodeURIComponent(img.arquivo);
-    html += '<button onclick="_verImagem('' + src + '', '' + img.nome + '')"'
+    html += '<button onclick="_verImagem(\'' + src + '\', \'' + img.nome + '\')"'
           + ' style="background:#252d3d; border:1px solid #30363d; border-radius:10px; cursor:pointer; padding:0; overflow:hidden; aspect-ratio:3/4;">'
           + '<img src="' + src + '" alt="' + img.nome + '" loading="lazy"'
           + ' style="width:100%; height:100%; object-fit:cover; display:block;">'
