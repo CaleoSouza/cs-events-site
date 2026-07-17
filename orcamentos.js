@@ -75,7 +75,7 @@ function _mostrarPdfs(ano) {
           + '<i class="bi bi-file-pdf" style="color:#ef4444; font-size:1.4rem; flex-shrink:0;"></i>'
           + '<span style="flex:1; font-size:.88rem; font-weight:500; color:#f9fafb; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + label + '</span>'
           + '<button onclick="abrirPdf(\'' + caminho + '\')" title="Abrir" style="background:#1e3a5f; border:none; color:#60a5fa; border-radius:7px; padding:.4rem .6rem; cursor:pointer; flex-shrink:0; font-size:.9rem; line-height:1;"><i class="bi bi-eye"></i></button>'
-          + '<a href="' + caminho + '" download="' + nome + '" title="Baixar" style="background:#14532d; border:none; color:#4ade80; border-radius:7px; padding:.4rem .6rem; cursor:pointer; flex-shrink:0; font-size:.9rem; line-height:1; text-decoration:none; display:inline-flex; align-items:center;"><i class="bi bi-download"></i></a>'
+          + '<button onclick="baixarPdf(\'' + caminho + '\', \'' + nome + '\')" title="Baixar" style="background:#14532d; border:none; color:#4ade80; border-radius:7px; padding:.4rem .6rem; cursor:pointer; flex-shrink:0; font-size:.9rem; line-height:1;"><i class="bi bi-download"></i></button>'
           + '</div>';
   }
   html += '</div>';
@@ -83,5 +83,23 @@ function _mostrarPdfs(ano) {
 }
 
 function abrirPdf(caminho) {
-  window.open(caminho, "_blank");
+  window.open(caminho, '_blank');
+}
+
+async function baixarPdf(caminho, nomeArquivo) {
+  try {
+    const resp = await fetch(caminho);
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    // Fallback: abre em nova aba
+    window.open(caminho, '_blank');
+  }
 }
