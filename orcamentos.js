@@ -36,7 +36,7 @@ function _mostrarAnos() {
   document.getElementById("orc-titulo").textContent = "Orcamentos";
   document.getElementById("orc-voltar").style.display = "none";
 
-  const anos = Object.keys(CATALOGO).sort((a, b) => b.localeCompare(a));
+  const anos = Object.keys(CATALOGO).sort((a, b) => a.localeCompare(b));
   let html = '<div style="display:grid; gap:.75rem;">';
   for (const ano of anos) {
     const qtd = CATALOGO[ano].length;
@@ -71,14 +71,12 @@ function _mostrarPdfs(ano) {
   for (const nome of pdfs) {
     const caminho = ORC_BASE + '/' + ano + '/' + encodeURIComponent(nome);
     const label = nome.replace(/\.pdf$/i, '');
-    html += '<button onclick="abrirPdf(\'' + caminho + '\')"'
-          + ' style="text-align:left; background:#252d3d; border:1px solid #30363d; color:#f9fafb;'
-          + ' padding:1rem 1.25rem; border-radius:10px; cursor:pointer; display:flex;'
-          + ' align-items:center; gap:.75rem;">'
+    html += '<div style="background:#252d3d; border:1px solid #30363d; border-radius:10px; display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem; overflow:hidden;">'
           + '<i class="bi bi-file-pdf" style="color:#ef4444; font-size:1.4rem; flex-shrink:0;"></i>'
-          + '<span style="flex:1; font-size:.92rem; font-weight:500; text-align:left;">' + label + '</span>'
-          + '<i class="bi bi-box-arrow-up-right" style="color:#6b7280; flex-shrink:0;"></i>'
-          + '</button>';
+          + '<span style="flex:1; font-size:.88rem; font-weight:500; color:#f9fafb; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + label + '</span>'
+          + '<button onclick="abrirPdf(\'' + caminho + '\')" title="Abrir" style="background:#1e3a5f; border:none; color:#60a5fa; border-radius:7px; padding:.4rem .6rem; cursor:pointer; flex-shrink:0; font-size:.9rem; line-height:1;"><i class="bi bi-eye"></i></button>'
+          + '<a href="' + caminho + '" download="' + nome + '" title="Baixar" style="background:#14532d; border:none; color:#4ade80; border-radius:7px; padding:.4rem .6rem; cursor:pointer; flex-shrink:0; font-size:.9rem; line-height:1; text-decoration:none; display:inline-flex; align-items:center;"><i class="bi bi-download"></i></a>'
+          + '</div>';
   }
   html += '</div>';
   corpo.innerHTML = html;
