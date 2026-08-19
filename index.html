@@ -341,9 +341,9 @@
       <i class="bi bi-shop"></i>
       Loja
     </button>
-    <button class="btn-reload" onclick="carregar()">
-      <i class="bi bi-arrow-clockwise" id="ico-reload"></i>
-      Atualizar
+    <button class="btn-reload" onclick="voltarHoje()">
+      <i class="bi bi-calendar-day" id="ico-reload"></i>
+      Hoje
     </button>
   </div>
 </header>
@@ -860,6 +860,16 @@ async function carregar() {
   } finally {
     ico.classList.remove('spinning');
   }
+}
+
+/* ─────────────────────────────────────────────────────────
+   VOLTAR PARA HOJE
+───────────────────────────────────────────────────────── */
+function voltarHoje() {
+  const hoje = new Date();
+  _calMes = hoje.getMonth();
+  _calAno = hoje.getFullYear();
+  carregar();
 }
 
 /* ─────────────────────────────────────────────────────────
