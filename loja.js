@@ -8,6 +8,7 @@ const LOJA_IMGS = [
   { nome: 'Quadros',                        arquivo: 'Quadros.jpg' },
   { nome: 'Revelação de Fotos',           arquivo: 'Revelação de fotos 2026.jpg' },
   { nome: 'Tabela Porcelana',               arquivo: 'Tabela Porcelana 2025-2026.jpg' },
+  { nome: 'Molduras e fotos.jpg',               arquivo: 'molduras e fotos.jpg' },
 ];
 
 const LOJA_BASE = 'assets/img';
