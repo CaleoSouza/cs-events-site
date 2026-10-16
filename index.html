@@ -193,6 +193,9 @@
     .cal-dot-reuniao {
       background: #9c27b0;  /* Roxo */
     }
+    .cal-dot-ferias {
+      background: #fbc02d;  /* Amarelo */
+    }
     .cal-dot-evento {
       background: #3b82f6;  /* Azul */
     }
@@ -518,6 +521,7 @@ const EMOJI_CAT = {
   'cobertura':     '📹',
   'família':        '👨‍👩‍👧',
   'feminina':      '💄',
+  'férias':        '🏖️',
   'formatura':     '🎓',
   'gestante':      '🤰',
   'infantil':      '🎈',
@@ -650,12 +654,14 @@ function renderCal() {
       const temParticular = evsDia.some(e => e.categoria?.toLowerCase() === 'particular');
       const temAtendimento = evsDia.some(e => e.categoria?.toLowerCase() === 'atendimento');
       const temReuniao = evsDia.some(e => e.categoria?.toLowerCase() === 'reunião');
-      const temOutro = evsDia.some(e => !['particular', 'atendimento', 'reunião'].includes(e.categoria?.toLowerCase() || ''));
+      const temFerias = evsDia.some(e => e.categoria?.toLowerCase() === 'férias');
+      const temOutro = evsDia.some(e => !['particular', 'atendimento', 'reunião', 'férias'].includes(e.categoria?.toLowerCase() || ''));
       
       dotsHtml = '<div class="cal-dots-container">';
       if (temParticular)  dotsHtml += '<div class="cal-dot cal-dot-particular"></div>';
       if (temAtendimento) dotsHtml += '<div class="cal-dot cal-dot-atendimento"></div>';
       if (temReuniao)     dotsHtml += '<div class="cal-dot cal-dot-reuniao"></div>';
+      if (temFerias)      dotsHtml += '<div class="cal-dot cal-dot-ferias"></div>';
       if (temOutro)       dotsHtml += '<div class="cal-dot cal-dot-evento"></div>';
       dotsHtml += '</div>';
     } else if (temFeriado) {
